@@ -31,11 +31,8 @@ class MyCovertChannel(CovertChannelBase):
             llc = LLC(dsap=0x69, ssap=int(bit))
             packet = ether / llc
             super().send(packet)
-
-        llc = LLC(dsap=0xff, ssap=int(bit))
-        packet = ether / llc
-        super().send(packet)
         
+                
         
     def receive(self, parameter1, parameter2, parameter3, log_file_name):
         """
