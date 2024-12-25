@@ -27,11 +27,16 @@ class MyCovertChannel(CovertChannelBase):
 
         self.message = self.generate_random_binary_message_with_logging(log_file_name)
 
-        for bit in self.message:
-            llc = LLC(dsap=0x69, ssap=int(bit))
-            packet = ether / llc
-            super().send(packet)
-        
+        for i in range(0, len(self.message), 8):
+            byte = int(self.message[i:i + 8])
+            byte ^= 0x69
+            byte = str(bin(byte))[2:]
+            for j in range(4):
+                bits = byte[j:j + 2]
+                llc = LLC(dsap=0x69, ssap=(0b11011000 | int(bits, 2)))
+                packet = ether / llc
+                super().send(packet)
+            
                 
         
     def receive(self, parameter1, parameter2, parameter3, log_file_name):
@@ -56,6 +61,7 @@ class MyCovertChannel(CovertChannelBase):
         
         message = ""
         for char in chars:
+            char ^= 0x69
             message = message + self.convert_eight_bits_to_character(char)
 
         self.log_message(message, log_file_name)
