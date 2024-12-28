@@ -4,6 +4,7 @@ from scapy.sendrecv import srp, sniff
 from scapy.layers.inet import Ether
 from scapy.layers.l2 import ARP, LLC, SNAP
 from scapy.all import get_if_hwaddr
+import random
 
 class MyCovertChannel(CovertChannelBase):
     """
@@ -17,13 +18,16 @@ class MyCovertChannel(CovertChannelBase):
         self.message = ""
 
 
-    def send(self, log_file_name, parameter1, parameter2):
+    def send(self, log_file_name, parameter1, parameter2, parameter3):
         """
         - We first get the MAC address of the sender.
         - Then, we create an Ethernet frame with the source MAC address of the sender and the destination MAC address of the broadcast address.
         - We generate a random binary message.
-        - For each byte in the message, we XOR it with some number before sending it.
-        - We send the message in the last 2 bits of the SSAP field.
+        - For each byte in the message, we XOR it with parameter1.
+        - Then for each bit we generate a random number between 0 and (parameter2-1) or between parameter2 and 15 depending on the parameter3.
+        - If the first bit of the parameter3 is 0 we generate a random number between 0 and (parameter2-1), otherwise between parameter2 and 15.
+        - If the second bit of the parameter3 is 0 we generate a random number between 0 and (parameter2-1), otherwise between parameter2 and 15.
+        - We send the message with combining these 2 halfbytes to the SSAP field of the LLC layer.
         """
         sender_mac = get_if_hwaddr("eth0")
         ether = Ether(src = sender_mac, dst = "ff:ff:ff:ff:ff:ff")
@@ -33,23 +37,44 @@ class MyCovertChannel(CovertChannelBase):
         for i in range(0, len(self.message), 8):
             byte = self.message[i:i + 8]
             byte = int(byte, 2)
-            byte ^= 0x69
+            byte ^= parameter1
             byte = str(bin(byte))[2:].zfill(8)
 
             for j in range(0, 8, 2):
                 bits = byte[j:j + 2]
+
+                if parameter3 % 2 == 0:
+                    bits0 = random.randint(parameter2,15) if bits[0] == '1' else random.randint(0,parameter2-1)
+                else:
+                    bits0 = random.randint(parameter2,15) if bits[0] == '0' else random.randint(0,parameter2-1)
+                
+                if parameter3 > 1:
+                    bits1 = random.randint(parameter2,15) if bits[1] == '1' else random.randint(0,parameter2-1)
+                else:
+                    bits1 = random.randint(parameter2,15) if bits[1] == '0' else random.randint(0,parameter2-1)
+
+                bits = str(bin(bits0))[2:].zfill(4) + str(bin(bits1))[2:].zfill(4)
+
                 llc = LLC(dsap=0x69, ssap=int(bits, 2))
                 packet = ether / llc
                 super().send(packet)
 
                 
         
-    def receive(self, parameter1, parameter2, parameter3, log_file_name):
+    def receive(self,log_file_name, parameter1, parameter2, parameter3):
         """
         - We sniff the packets.
         - For each packet, we check if it has LLC layer.
-        - If it has, we extract the last 2 bits of the SSAP field.
-        - When we receive the whole 8 bits, we XOR them with some number and convert them to a character.
+        - If it has, we extract the SSAP field.
+        - First we check parameter3 to determine the range of the random number for two bits.
+        - If the first bit of the parameter3 is 0 we check if the first 4 bits of the SSAP field is greater than or equal to parameter2.
+        - If it is, we set the first bit of the byte to 1, otherwise 0.
+        - Likewise, if the second bit of the parameter3 is 0 we check if the last 4 bits of the SSAP field is greater than or equal to parameter2.
+        - If it is, we set the second bit of the byte to 1, otherwise 0.
+        - We concatenate these 2 bits to form a byte.
+        - After 4 packets, we get a byte.
+        - Then we XOR the byte with parameter1.
+        - We convert the byte to a character.
         - We check if the received character is a dot character. If it is, we stop receiving the message.
         - We log the message to the log file.
         """
@@ -61,13 +86,29 @@ class MyCovertChannel(CovertChannelBase):
             nonlocal counter
 
             if LLC in packet:
-                byte = byte + bin(packet[LLC].ssap)[2:].zfill(8)[-2:]
+                packet.show()
+                ssap_byte = bin(packet[LLC].ssap)[2:].zfill(8)
+                bits0 = ssap_byte[:4]
+                bits1 = ssap_byte[4:]
+
+                if parameter3 % 2 == 0:
+                    bit0 = '1' if int(bits0, 2) >= parameter2 else '0'
+                else:
+                    bit0 = '0' if int(bits0, 2) >= parameter2 else '1'
+
+                if parameter3 > 1:
+                    bit1 = '1' if int(bits1, 2) >= parameter2 else '0'
+                else:
+                    bit1 = '0' if int(bits1, 2) >= parameter2 else '1'
+                
+                bits = bit0 + bit1
+                byte += bits
                 counter += 1
                 
                 if counter == 4:
                     counter = 0
                     byte = int(byte, 2)
-                    byte ^= 0x69
+                    byte ^= parameter1
 
                     received_char = chr(byte)
                     
