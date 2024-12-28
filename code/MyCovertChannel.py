@@ -5,6 +5,7 @@ from scapy.layers.inet import Ether
 from scapy.layers.l2 import ARP, LLC, SNAP
 from scapy.all import get_if_hwaddr
 import random
+import time
 
 class MyCovertChannel(CovertChannelBase):
     """
@@ -32,7 +33,9 @@ class MyCovertChannel(CovertChannelBase):
         sender_mac = get_if_hwaddr("eth0")
         ether = Ether(src = sender_mac, dst = "ff:ff:ff:ff:ff:ff")
 
-        self.message = self.generate_random_binary_message_with_logging(log_file_name)
+        self.message = self.generate_random_binary_message_with_logging(log_file_name, min_length=16, max_length=16)
+        
+        start_time = time.time()
 
         for i in range(0, len(self.message), 8):
             byte = self.message[i:i + 8]
@@ -59,7 +62,10 @@ class MyCovertChannel(CovertChannelBase):
                 packet = ether / llc
                 super().send(packet)
 
-                
+        end_time = time.time()
+        time_diff = end_time - start_time
+        result = 128 / time_diff
+        print(f"Sent {len(self.message)} bytes in {time_diff} seconds. The bandwidth is {result} bytes/second.")
         
     def receive(self,log_file_name, parameter1, parameter2, parameter3):
         """
