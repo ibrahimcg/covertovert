@@ -1,8 +1,8 @@
 from CovertChannelBase import CovertChannelBase
 
-from scapy.sendrecv import srp, sniff
+from scapy.sendrecv import sniff
 from scapy.layers.inet import Ether
-from scapy.layers.l2 import ARP, LLC, SNAP
+from scapy.layers.l2 import LLC
 from scapy.all import get_if_hwaddr
 import random
 import time
@@ -25,9 +25,11 @@ class MyCovertChannel(CovertChannelBase):
         - Then, we create an Ethernet frame with the source MAC address of the sender and the destination MAC address of the broadcast address.
         - We generate a random binary message.
         - For each byte in the message, we XOR it with parameter1.
-        - Then for each bit we generate a random number between 0 and (parameter2-1) or between parameter2 and 15 depending on the parameter3.
-        - If the first bit of the parameter3 is 0 we generate a random number between 0 and (parameter2-1), otherwise between parameter2 and 15.
-        - If the second bit of the parameter3 is 0 we generate a random number between 0 and (parameter2-1), otherwise between parameter2 and 15.
+        - Then for each bit we generate a random number between 0 and (parameter2-1) or between parameter2 and 15 depending on parameter3.
+        - For the significant in the pair, we generate a random number between 0 and (parameter2-1) if the insignificant bit of parameter3 is 0 and the significant bit in the pair is 0. 
+        - Otherwise, we generate between parameter2 and 15, and vice-versa for the case where the insignificant bit of parameter3 is 1.
+        - For the insignificant bit in the pair, we generate a random number between 0 and (parameter2-1) if the significant bit of parameter3 is 1 and the insignificant bit in the pair is 0. 
+        - Otherwise, we generate between parameter2 and 15, and vice-versa for the case where the significant bit of parameter3 is 0.
         - We send the message with combining these 2 halfbytes to the SSAP field of the LLC layer.
         """
         sender_mac = get_if_hwaddr("eth0")
