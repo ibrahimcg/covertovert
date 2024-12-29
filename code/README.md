@@ -6,9 +6,20 @@ This covert channel implements a storage channel. It utilizes protocol field man
 
 As the purpose of the covert channels is to convey information in a stealth way, the information must be encoded by the sender and decoded by the receiver. This covert channel encodes the message in the following way. 
 
+## Packet Structure
+### Ethernet Frame
+The covert channel uses standard Ethernet frames with the following structure:
+
+* Source MAC Address: The MAC address of the sender (obtained from eth0 interface)
+* Destination MAC Address: Broadcast address (ff:ff:ff:ff:ff:ff)
+* LLC Layer:
+    * SSAP: Used for covert data transmission (manipulated field)
+
+Each packet carries 2 bits of the encoded message within this field.
+ 
 ## Important Notes
 * Both sender and receiver must use the same parameters to ensure safe encoding and decoding
-* **Covert Channel Capacity**: ~25 bytes/second
+* **Covert Channel Capacity**: ~664 bits/second (~83 bytes/second)
  
 ## Parameters
 
