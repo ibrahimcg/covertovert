@@ -4,7 +4,8 @@
     "parameters": {
       "parameter1": 105,
       "parameter2": 8,
-      "parameter3": 3,
+      "parameter3": "up",
+      "parameter4": "down",
       "log_file_name": "Example_UDPTimingInterarrivalChannelSender.log"
     }
   },
@@ -12,7 +13,8 @@
     "parameters": {
       "parameter1": 105,
       "parameter2": 8,
-      "parameter3": 3,
+      "parameter3": "up",
+      "parameter4": "down",
       "log_file_name": "Example_UDPTimingInterarrivalChannelReceiver.log"
     }
   }

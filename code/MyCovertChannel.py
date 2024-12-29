@@ -19,7 +19,7 @@ class MyCovertChannel(CovertChannelBase):
         self.message = ""
 
 
-    def send(self, log_file_name, parameter1, parameter2, parameter3):
+    def send(self, log_file_name, parameter1, parameter2, parameter3, parameter4):
         """
         - We first get the MAC address of the sender.
         - Then, we create an Ethernet frame with the source MAC address of the sender and the destination MAC address of the broadcast address.
@@ -48,15 +48,19 @@ class MyCovertChannel(CovertChannelBase):
             for j in range(0, 8, 2):
                 bits = byte[j:j + 2]
 
-                if parameter3 % 2 == 0:
+                if parameter3 == "up":
                     bits0 = random.randint(parameter2,15) if bits[0] == '1' else random.randint(0,parameter2-1)
-                else:
+                elif parameter3 == "down":
                     bits0 = random.randint(parameter2,15) if bits[0] == '0' else random.randint(0,parameter2-1)
-                
-                if parameter3 > 1:
-                    bits1 = random.randint(parameter2,15) if bits[1] == '1' else random.randint(0,parameter2-1)
                 else:
+                    raise Exception("Invalid parameter3 value")
+                
+                if parameter4 == "up":
+                    bits1 = random.randint(parameter2,15) if bits[1] == '1' else random.randint(0,parameter2-1)
+                elif parameter4 == "down":
                     bits1 = random.randint(parameter2,15) if bits[1] == '0' else random.randint(0,parameter2-1)
+                else:
+                    raise Exception("Invalid parameter4 value")
 
                 bits = str(bin(bits0))[2:].zfill(4) + str(bin(bits1))[2:].zfill(4)
 
@@ -69,7 +73,7 @@ class MyCovertChannel(CovertChannelBase):
         result = 128 / time_diff
         print(f"Sent {len(self.message)} bytes in {time_diff} seconds. The bandwidth is {result} bytes/second.")
         
-    def receive(self,log_file_name, parameter1, parameter2, parameter3):
+    def receive(self,log_file_name, parameter1, parameter2, parameter3, parameter4):
         """
         - We sniff the packets.
         - For each packet, we check if it has LLC layer.
@@ -99,15 +103,19 @@ class MyCovertChannel(CovertChannelBase):
                 bits0 = ssap_byte[:4]
                 bits1 = ssap_byte[4:]
 
-                if parameter3 % 2 == 0:
+                if parameter3 == "up":
                     bit0 = '1' if int(bits0, 2) >= parameter2 else '0'
-                else:
+                elif parameter3 == "down":
                     bit0 = '0' if int(bits0, 2) >= parameter2 else '1'
-
-                if parameter3 > 1:
-                    bit1 = '1' if int(bits1, 2) >= parameter2 else '0'
                 else:
+                    raise Exception("Invalid parameter3 value")
+
+                if parameter4 == "up":
+                    bit1 = '1' if int(bits1, 2) >= parameter2 else '0'
+                elif parameter4 == "down":
                     bit1 = '0' if int(bits1, 2) >= parameter2 else '1'
+                else:
+                    raise Exception("Invalid parameter4 value")
                 
                 bits = bit0 + bit1
                 byte += bits
