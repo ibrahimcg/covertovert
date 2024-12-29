@@ -23,8 +23,30 @@ Each packet carries 2 bits of the encoded message within this field.
  
 ## Parameters
 
-The system uses 4 parameters:
-
+The system uses the 4 parameters in the config.json file:
+```
+{
+  "covert_channel_code": "CSC-PSV-TCP-WS",
+  "send": {
+    "parameters": {
+      "parameter1": 105,
+      "parameter2": 8,
+      "parameter3": "up",
+      "parameter4": "down",
+      "log_file_name": "Example_UDPTimingInterarrivalChannelSender.log"
+    }
+  },
+  "receive": {
+    "parameters": {
+      "parameter1": 105,
+      "parameter2": 8,
+      "parameter3": "up",
+      "parameter4": "down",
+      "log_file_name": "Example_UDPTimingInterarrivalChannelReceiver.log"
+    }
+  }
+}
+```
 * **parameter1**: Takes a value between 0 and 255
 * **parameter2**: Takes a value between 1 and 15
 * **parameter3**: Takes either "up" or "down"
