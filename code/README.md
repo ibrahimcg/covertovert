@@ -19,7 +19,7 @@ Each packet carries 2 bits of the encoded message within this field.
  
 ## Important Notes
 * Both sender and receiver must use the same parameters to ensure safe encoding and decoding
-* **Covert Channel Capacity**: ~664 bits/second (~83 bytes/second)
+* **Covert Channel Capacity**: ~85 bits/second
  
 ## Parameters
 

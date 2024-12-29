@@ -71,7 +71,7 @@ class MyCovertChannel(CovertChannelBase):
         end_time = time.time()
         time_diff = end_time - start_time
         result = 128 / time_diff
-        print(f"Sent {len(self.message)} bytes in {time_diff:.2f} seconds. \nThe covert channel capacity is {result*8:.2f} bits/second.")
+        print(f"Sent {len(self.message)} bytes in {time_diff:.2f} seconds. \nThe covert channel capacity is {result:.2f} bits/second.")
         
     def receive(self,log_file_name, parameter1, parameter2, parameter3, parameter4):
         """
