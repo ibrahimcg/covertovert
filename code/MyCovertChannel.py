@@ -25,7 +25,7 @@ class MyCovertChannel(CovertChannelBase):
         - Then, we create an Ethernet frame with the source MAC address of the sender and the destination MAC address of the broadcast address.
         - We generate a random binary message.
         - For each byte in the message, we XOR it with parameter1.
-        - Then for each bit we generate a random number between 0 and (parameter2-1) or between parameter2 and 15 depending on parameter3.
+        - Then for each bit we generate a random number between 0 and (parameter2-1) or between parameter2 and 15 depending on parameter3 or parameter4.
         - For the significant in the pair, we generate a random number between 0 and (parameter2-1) if parameter3 is "up" and the significant bit in the pair is 0. 
         - Otherwise, we generate between parameter2 and 15, and vice-versa in case parameter3 is "down".
         - For the insignificant bit in the pair, we generate a random number between 0 and (parameter2-1) if parameter4 is "up" and the insignificant bit in the pair is 0. 
@@ -71,7 +71,7 @@ class MyCovertChannel(CovertChannelBase):
         end_time = time.time()
         time_diff = end_time - start_time
         result = 128 / time_diff
-        print(f"Sent {len(self.message)} bytes in {time_diff} seconds. The bandwidth is {result} bytes/second.")
+        print(f"Sent {len(self.message)} bytes in {time_diff} seconds. The capacity is {result} bytes/second.")
         
     def receive(self,log_file_name, parameter1, parameter2, parameter3, parameter4):
         """
@@ -79,12 +79,12 @@ class MyCovertChannel(CovertChannelBase):
         - For each packet, we check if it has LLC layer.
         - If it has, we extract the SSAP field.
         - First we check parameter3 to determine the range of the random number for two bits.
-        - If parameter3 is "up", we check if the first 4 bits of the SSAP field is greater than or equal to parameter2.
-        - If it is, we set the first bit of the byte to 1, otherwise 0. In case parameter3 is "down", we do the opposite.
-        - Likewise, if parameter4 is "up" we check if the last 4 bits of the SSAP field is greater than or equal to parameter2.
-        - If it is, we set the second bit of the byte to 1, otherwise 0. In case parameter4 is "down", we do the opposite.
-        - We concatenate these 2 bits to form a byte.
-        - After 4 packets, we get a byte.
+        - If parameter3 is "up", we check if the leftmost 4 bits of the SSAP field is greater than or equal to parameter2.
+        - If it is, we set the leftmost bit of the bit pair to 1, otherwise 0. In case parameter3 is "down", we do the opposite.
+        - Likewise, if parameter4 is "up" we check if the rightmost 4 bits of the SSAP field is greater than or equal to parameter2.
+        - If it is, we set the rightmost bit of the bit pair to 1, otherwise 0. In case parameter4 is "down", we do the opposite.
+        - Then we get the correct bit pair from the received packet.
+        - After 4 packets, we combine these bit pairs to get a byte.
         - Then we XOR the byte with parameter1.
         - We convert the byte to a character.
         - We check if the received character is a dot character. If it is, we stop receiving the message.
@@ -98,7 +98,7 @@ class MyCovertChannel(CovertChannelBase):
             nonlocal counter
 
             if LLC in packet:
-                packet.show()
+                #packet.show()
                 ssap_byte = bin(packet[LLC].ssap)[2:].zfill(8)
                 bits0 = ssap_byte[:4]
                 bits1 = ssap_byte[4:]
