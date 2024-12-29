@@ -64,7 +64,7 @@ class MyCovertChannel(CovertChannelBase):
 
                 bits = str(bin(bits0))[2:].zfill(4) + str(bin(bits1))[2:].zfill(4)
 
-                llc = LLC(dsap=0x69, ssap=int(bits, 2))
+                llc = LLC(ssap=int(bits, 2))
                 packet = ether / llc
                 super().send(packet)
 
