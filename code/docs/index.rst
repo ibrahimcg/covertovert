@@ -8,9 +8,18 @@ Covert Channel documentation
 
 Please add your names, group ID, and your link to the forked public repository here by editing `index.rst` in the docs folder.
 
-Names: İbrahim Can Gökdemir, Barış Berk Kottaş
-Group 68
-https://github.com/ibrahimcg/covertovert
+Group members:
+--------------
+- İbrahim Can Gökdemir
+- Barış Berk Kottaş
+
+Group ID:
+---------
+- 68
+
+Repository link:
+----------------
+- https://github.com/ibrahimcg/covertovert
 
 .. toctree::
    :maxdepth: 2
