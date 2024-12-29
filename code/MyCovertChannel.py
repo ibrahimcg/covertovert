@@ -26,10 +26,10 @@ class MyCovertChannel(CovertChannelBase):
         - We generate a random binary message.
         - For each byte in the message, we XOR it with parameter1.
         - Then for each bit we generate a random number between 0 and (parameter2-1) or between parameter2 and 15 depending on parameter3.
-        - For the significant in the pair, we generate a random number between 0 and (parameter2-1) if the insignificant bit of parameter3 is 0 and the significant bit in the pair is 0. 
-        - Otherwise, we generate between parameter2 and 15, and vice-versa for the case where the insignificant bit of parameter3 is 1.
-        - For the insignificant bit in the pair, we generate a random number between 0 and (parameter2-1) if the significant bit of parameter3 is 1 and the insignificant bit in the pair is 0. 
-        - Otherwise, we generate between parameter2 and 15, and vice-versa for the case where the significant bit of parameter3 is 0.
+        - For the significant in the pair, we generate a random number between 0 and (parameter2-1) if parameter3 is "up" and the significant bit in the pair is 0. 
+        - Otherwise, we generate between parameter2 and 15, and vice-versa in case parameter3 is "down".
+        - For the insignificant bit in the pair, we generate a random number between 0 and (parameter2-1) if parameter4 is "up" and the insignificant bit in the pair is 0. 
+        - Otherwise, we generate between parameter2 and 15, and vice-versa in case parameter4 is "down".
         - We send the message with combining these 2 halfbytes to the SSAP field of the LLC layer.
         """
         sender_mac = get_if_hwaddr("eth0")
@@ -79,10 +79,10 @@ class MyCovertChannel(CovertChannelBase):
         - For each packet, we check if it has LLC layer.
         - If it has, we extract the SSAP field.
         - First we check parameter3 to determine the range of the random number for two bits.
-        - If the first bit of the parameter3 is 0 we check if the first 4 bits of the SSAP field is greater than or equal to parameter2.
-        - If it is, we set the first bit of the byte to 1, otherwise 0.
-        - Likewise, if the second bit of the parameter3 is 0 we check if the last 4 bits of the SSAP field is greater than or equal to parameter2.
-        - If it is, we set the second bit of the byte to 1, otherwise 0.
+        - If parameter3 is "up", we check if the first 4 bits of the SSAP field is greater than or equal to parameter2.
+        - If it is, we set the first bit of the byte to 1, otherwise 0. In case parameter3 is "down", we do the opposite.
+        - Likewise, if parameter4 is "up" we check if the last 4 bits of the SSAP field is greater than or equal to parameter2.
+        - If it is, we set the second bit of the byte to 1, otherwise 0. In case parameter4 is "down", we do the opposite.
         - We concatenate these 2 bits to form a byte.
         - After 4 packets, we get a byte.
         - Then we XOR the byte with parameter1.
